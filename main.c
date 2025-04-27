@@ -120,7 +120,34 @@ int main(void) {
     set_station_links(&st[8], 4, &st[5], &st[6], &st[7], &st[9]);
     set_station_links(&st[9], 1, &st[8]);
 
-    // __ASSERT_TESTS__ // макроопределение для тестирования (не убирать и должно идти непосредственно перед return 0)
+    STATION* path[max_path_station];
+    STATION* p_test_1[] = {&st[0], &st[2], &st[5], &st[8], &st[9]};
+    const int test_count_1 = 5;
+
+    int count_st = 0;
+
+    find_path(&st[0], &st[9], path, &count_st);
+    assert(("Не верное число станций в маршруте при поиске от №1 до №10", count_st == test_count_1));
+
+    int _a1 = 1;
+    for(int i = 0;i < count_st;++i)
+        _a1 = _a1 && (path[i] == p_test_1[i]);
+
+    assert(("Не верные станции в маршруте при поиске от №1 до №10", _a1));
+
+    STATION* p_test_2[] = {&st[2], &st[5], &st[8], &st[9]};
+    const int test_count_2 = 4;
+
+    count_st = 0;
+    find_path(&st[2], &st[9], path, &count_st);
+
+    assert(("Не верное число станций в маршруте при поиске от №3 до №10", count_st == test_count_2));
+
+    int _a2 = 1;
+    for(int i = 0;i < count_st;++i)
+        _a2 = _a2 && (path[i] == p_test_2[i]);
+
+    assert(("Не верные станции в маршруте при поиске от №3 до №10", _a2));
 
 
     return 0;
