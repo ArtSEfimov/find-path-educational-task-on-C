@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/CLionProjects/cmake-build-debug",
-		"source" : "C:/CLionProjects"
+		"build" : "H:/CProjects/find-path-educational-task-on-C/cmake-build-debug",
+		"source" : "H:/CProjects/find-path-educational-task-on-C"
 	},
 	"version" : 
 	{

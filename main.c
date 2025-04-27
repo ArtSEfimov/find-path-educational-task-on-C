@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 enum { name_length = 50, total_links = 50, max_path_station = 100 };
 
@@ -35,30 +36,61 @@ void get_path(STATION *previous_station, STATION *path[], int *count_st) {
     }
 }
 
-void find_path(STATION *from, STATION *to, STATION *path[], int *count_st) {
-    static STATION queue[max_path_station];
-    queue[0] = *from;
-    const STATION *queue_input = queue;
-    STATION *queue_output = queue;
-    queue_output->fl_reserved = 1;
-    queue_output->previous_tag_station = NULL;
-    queue_input++;
+void reverse_path(STATION **path, const int *count_st) {
+    STATION *tmp = NULL;
+    for (int i = 0, j = *count_st - 1; i < j; i++, j--) {
+        tmp = path[i];
+        path[i] = path[j];
+        path[j] = tmp;
+    }
+}
 
-    while (queue_input != queue_output) {
-        for (int i = 0; i < queue_output->count_links; i++) {
-            STATION next_station = *queue_output->links[i];
-            next_station.previous_tag_station = queue_output;
-            next_station.fl_reserved = 1;
-            if (next_station.name == to->name) {
+static STATION *queue[max_path_station];
+
+static void reset_queue(void) {
+    for (STATION **p = queue; p < queue + max_path_station; ++p) {
+        if (*p) {
+            (*p)->fl_reserved = 0;
+            (*p)->previous_tag_station = NULL;
+        } else {
+            break;
+        }
+    }
+
+    memset(queue, 0, sizeof(queue));
+}
+
+
+void find_path(STATION *from, STATION *to, STATION *path[], int *count_st) {
+    reset_queue();
+
+    // init head and tail pointers
+    STATION **head = queue;
+    STATION **tail = queue + 1;
+
+    // add first element
+    *head = from;
+    (*head)->fl_reserved = 1;
+    (*head)->previous_tag_station = NULL;
+
+    while (*head != *tail) {
+        for (int i = 0; i < (*head)->count_links; i++) {
+            if ((*head)->links[i]->fl_reserved == 1) {
+                continue;
+            }
+            (*head)->links[i]->fl_reserved = 1;
+            (*head)->links[i]->previous_tag_station = *head;
+            *tail = (*head)->links[i];
+            if ((*head)->links[i]->name == to->name) {
                 path[0] = to;
-                *count_st++;
+                *count_st = *count_st + 1;
                 get_path(to->previous_tag_station, path, count_st);
+                reverse_path(path, count_st);
                 return;
             }
-            queue_input = &next_station;
-            queue_input++;
+            tail++;
         }
-        queue_output++;
+        head++;
     }
 }
 
@@ -88,13 +120,8 @@ int main(void) {
     set_station_links(&st[8], 4, &st[5], &st[6], &st[7], &st[9]);
     set_station_links(&st[9], 1, &st[8]);
 
-    STATION *path[max_path_station] = {0};
-    int count_st = 0;
-    find_path(&st[0], &st[6], path, &count_st);
-    for (int i = 0; i < count_st; i++) {
-        printf("%s\n", path[i]->name);
-    }
-
     // __ASSERT_TESTS__ // макроопределение для тестирования (не убирать и должно идти непосредственно перед return 0)
+
+
     return 0;
 }
